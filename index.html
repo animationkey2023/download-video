@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>YouTube Video Downloader</title>
+  <title>YouTube Downloader dengan Resolusi</title>
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
       padding: 50px;
     }
-    input, button {
+    input, button, select {
       padding: 10px;
       font-size: 1em;
       margin: 10px;
@@ -19,22 +19,37 @@
 </head>
 <body>
   <h1>YouTube Video Downloader</h1>
-  <input type="text" id="url" placeholder="Masukkan URL YouTube">
+  <input type="text" id="url" placeholder="Masukkan URL YouTube"><br>
+  <label for="resolution">Resolusi:</label>
+  <select id="resolution">
+    <option value="144">144p</option>
+    <option value="360" selected>360p</option>
+    <option value="480">480p</option>
+    <option value="720">720p</option>
+    <option value="1080">1080p</option>
+  </select><br>
   <button onclick="download()">Download</button>
   <p id="status"></p>
 
   <script>
     async function download() {
       const url = document.getElementById("url").value;
+      const resolution = document.getElementById("resolution").value;
       document.getElementById("status").innerText = "Memproses...";
+
       const response = await fetch('/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
+        body: JSON.stringify({ url, resolution })
       });
 
-      const result = await response.blob();
-      const blobUrl = URL.createObjectURL(result);
+      if (!response.ok) {
+        document.getElementById("status").innerText = "Gagal mengunduh.";
+        return;
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
       a.download = 'video.mp4';
